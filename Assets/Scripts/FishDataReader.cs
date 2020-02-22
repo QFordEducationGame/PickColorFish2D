@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Data;
-using Chart3D.DataProvider.Data.Excel;
 using System.IO;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
 /// <summary>
 /// Parse fish data from an excel file.
 /// Use NOPI Plugin
@@ -11,34 +12,39 @@ using System.IO;
 /// </summary>
 public static class FishDataReader 
 {
-     static readonly DataTable dt;
      static List<Fish> fishList;
     /// <summary>
     /// Load excel data
     /// </summary>
-     static FishDataReader()
+    static FishDataReader()
     {
-        string path = Path.Combine(Application.streamingAssetsPath, "PickColorFishData.xlsx");
-        dt = ExcelUtils.ReadAsDataTable(path);
-        if (dt!=null && dt.Rows.Count > 0)
+        string path = Path.Combine(Application.streamingAssetsPath, "PickColorFishData.json");
+        string jsonString = File.ReadAllText(path);
+        //Debug.Log(jsonString.Length);
+        //https://www.newtonsoft.com/json/help/html/M_Newtonsoft_Json_Linq_JArray_Parse.htm
+        JArray allFishData = JArray.Parse(jsonString);
+        if (allFishData != null && allFishData.Count > 0)
         {
-            fishList = new List<Fish>(dt.Rows.Count);
-            for (int i = 0; i < dt.Rows.Count; i++)
+            fishList = new List<Fish>(allFishData.Count);
+            for (int i = 0; i < allFishData.Count; i++)
             {
-                string fishID = dt.Rows[i]["FishID"].ToString();
-                int shape = int.Parse( dt.Rows[i]["Shape"].ToString());
-                int red = int.Parse(dt.Rows[i]["Red"].ToString());
-                int green = int.Parse(dt.Rows[i]["Green"].ToString());
-                int yellow = int.Parse(dt.Rows[i]["Yellow"].ToString());
-                int blue = int.Parse(dt.Rows[i]["Blue"].ToString());
-                int white = int.Parse(dt.Rows[i]["White"].ToString());
-                int purple = int.Parse(dt.Rows[i]["Purple"].ToString());
+                string fishID = allFishData[i]["FishID"].ToString();
+                int shape = int.Parse(allFishData[i]["Shape"].ToString());
+                int red = int.Parse(allFishData[i]["Red"].ToString());
+                int green = int.Parse(allFishData[i]["Green"].ToString());
+                int yellow = int.Parse(allFishData[i]["Yellow"].ToString());
+                int blue = int.Parse(allFishData[i]["Blue"].ToString());
+                int white = int.Parse(allFishData[i]["White"].ToString());
+                int purple = int.Parse(allFishData[i]["Purple"].ToString());
                 Fish fish = new Fish(fishID, shape, red, green, yellow, blue, white, purple);
                 fishList.Add(fish);
+                //Debug.Log("FishDataReader.cs:fishList's count = "+fishList.Count);
             }
-            //Debug.Log("FishDataReader.cs:fishList's count = "+fishList.Count);
         }
     }
+
+
+
     /// <summary>
     /// for test data output
     /// </summary>
